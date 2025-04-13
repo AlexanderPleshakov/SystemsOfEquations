@@ -51,7 +51,9 @@ let exampleCConstraints = [
     Constraint(a: 1, b: 4, c: 8, sign: .greaterThanOrEqual),
     Constraint(a: 2, b: 1, c: 3, sign: .greaterThanOrEqual),
     Constraint(a: 1, b: 0, c: 0, sign: .greaterThanOrEqual),
-    Constraint(a: 0, b: 1, c: 0, sign: .greaterThanOrEqual)
+    Constraint(a: 0, b: 1, c: 0, sign: .greaterThanOrEqual),
+    Constraint(a: 1, b: 0, c: 100, sign: .lessThanOrEqual),
+    Constraint(a: 0, b: 1, c: 100, sign: .lessThanOrEqual)
 ]
 let exampleCObjective = ObjectiveFunction(a: 1, b: 3, mode: .max)
 
@@ -251,6 +253,19 @@ struct ContentView: View {
     @State private var selectedProblem = "A"
     @State private var scale: CGFloat = 20.0
     @State private var cValue: Double = 0.0
+    
+    var infoText: String {
+        let modeText = currentObjective.mode == .max ? "максимум" : "минимум"
+        let a = currentObjective.a
+        let b = currentObjective.b
+        let aStr = String(format: "%.1f", a)
+        let bStr = String(format: "%.1f", b)
+        
+        let signB = b >= 0 ? "+" : "-"
+        let bAbs = String(format: "%.1f", abs(b))
+        
+        return "Необходимо найти \(modeText)\nФункция: z = \(aStr)x \(signB) \(bAbs)y"
+    }
 
     var currentConstraints: [Constraint] {
         switch selectedProblem {
@@ -272,14 +287,20 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Picker("Выберите задачу", selection: $selectedProblem) {
-                Text("A").tag("A")
-                Text("B").tag("B")
-                Text("C").tag("C")
-                Text("D").tag("D")
+            HStack {
+                Picker("Выберите задачу", selection: $selectedProblem) {
+                    Text("A").tag("A")
+                    Text("B").tag("B")
+                    Text("C").tag("C")
+                    Text("D").tag("D")
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                
+                Text(infoText)
+                    .font(.headline)
+                    .padding()
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
 
             GeometryReader { geo in
                 LPGraphView(
